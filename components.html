@@ -64,18 +64,52 @@
         app.component('login-form', {
 
             /* v-bind:props-name or :props-name - directive to pass props to child component */
+            /* key should be unique for each 'for-in' looped element;
+            if elements have unique names- they can be used as keys, otherwise index can be used
+            :key - binding key to the element */
             template: `
                 <form @submit.prevent="handleSubmit">
                     <h1>{{ title }}</h1>
+                    <p v-for="str in inputs" :key="str">{{ str }}</p>
+                    <p v-for="(str, i) in inputs" :key="i">{{ str }} - {{ i }}</p>
+                    <hr/>
                     <custom-input v-model="email" :label="emailLabel"/>  
-                    <custom-input v-model="password" v-bind:label="passwordLabel"/>
+                    <custom-input v-model="password" v-bind:label="passwordLabel" type="password"/>
                     <button>Log in</button>
+                </form>
+                <form @submit.prevent="otherHandleSubmit">
+                    <h1>{{ title }}</h1>
+                    <custom-input
+                        v-for="(input, i) in newInputs"
+                        :key="i"
+                        v-model="input.value" 
+                        :label="input.label"
+                        :type="input.type"
+                    />  
+                    <button>Submit</button>
                 </form>
             `,
             components: ['custom-input'],
             data() {
                 return {
                     title: 'Login Form',
+                    inputs: [
+                        'email',
+                        'password',
+                        'name'
+                    ],
+                    newInputs:[   /* looping through data and pass it to custom-input */
+                        {
+                            label: 'EMAIL',
+                            value: '',
+                            type: 'email'
+                        },
+                        {
+                            label: 'PASSWORD',
+                            value: '',
+                            type: 'password'
+                        }
+                    ],
                     email: '',
                     password: '',
                     emailLabel: 'Email',
@@ -86,6 +120,9 @@
                 handleSubmit() {
                     console.log('submitted');
                     console.log(this.email, this.password);
+                },
+                otherHandleSubmit() {
+                    console.log(this.newInputs[0].value, this.newInputs[1].value);
                 }
             }
         })
@@ -93,13 +130,13 @@
             template: `
                 <label>
                     {{ label }}
-                    <input type="text" v-model="inputValue">
+                    <input :type="type" v-model="inputValue">
                 </label>
             `,
 
              // 'get data from' and 'set data to' parent -  via parent's 'v-model' directive
              // modelValue props - VUE props to get from v-model (prop under the hood - :modelValue="variable")  
-            props: ['label', 'modelValue'], 
+            props: ['label', 'type', 'modelValue'], 
             computed: {
                 inputValue: {
                     get() {
